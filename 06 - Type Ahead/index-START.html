@@ -1,23 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Type Ahead 👀</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="icon" href="https://fav.farm/🔥" />
+    <meta charset="UTF-8">
+    <title>Type Ahead 👀</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="https://fav.farm/🔥"/>
 </head>
 <body>
 
-  <form class="search-form">
+<form class="search-form">
     <input type="text" class="search" placeholder="City or State">
     <ul class="suggestions">
-      <li>Filter for a city</li>
-      <li>or a state</li>
+        <li>Filter for a city</li>
+        <li>or a state</li>
     </ul>
-  </form>
+</form>
 <script>
-const endpoint = 'https://gist.githubusercontent.com/Miserlou/c5cd8364bf9b2420bb29/raw/2bf258763cdddd704f8ffd3ea9a3e81d25e2c6f6/cities.json';
+    const endpoint = 'https://gist.githubusercontent.com/Miserlou/c5cd8364bf9b2420bb29/raw/2bf258763cdddd704f8ffd3ea9a3e81d25e2c6f6/cities.json';
 
+    const cities = [];
+    fetch(endpoint)
+        .then(blob => blob.json())
+        .then(data => cities.push(...data));
+
+    function matchEvent(str) {
+        const regex = new RegExp(str, 'gi');
+        return cities.filter(data => {
+            return data.city.match(regex) || data.state.match(regex);
+        });
+    }
+
+    function numberWithCommas(x) {
+        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    }
+
+    function inputEvent() {
+        const filterData = matchEvent(this.value);
+        ul.innerHTML = filterData.map(data => {
+            const regex = new RegExp(this.value, 'gi');
+            const cityName = data.city.replace(regex, `<span class="hl">${this.value}</span>`);
+            const stateName = data.state.replace(regex, `<span class="hl">${this.value}</span>`);
+            return `<li>
+                        <span class="name">${cityName}, ${stateName}</span>
+                        <span class="population">${numberWithCommas(data.population)}</span>
+                    </li>`
+        }).join('');
+    }
+
+    const input = document.querySelector('.search');
+    const ul = document.querySelector('.suggestions');
+
+    input.addEventListener('change', inputEvent);
+    input.addEventListener('keyup', inputEvent);
 </script>
 </body>
 </html>
